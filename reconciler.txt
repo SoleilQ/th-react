@@ -1,0 +1,6 @@
+ JSX消费的顺序
+ 以DFS的顺序遍历React Element
+
+ 这是个递归的过程
+ 递: beginWork
+ 归: completeWork
