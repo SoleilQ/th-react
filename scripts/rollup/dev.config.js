@@ -1,48 +1,6 @@
-import typescript from 'rollup-plugin-typescript2';
-import path from 'path';
-import resolve from '@rollup/plugin-babel';
-import babel from '@rollup/plugin-babel';
-import generatePackageJson from 'rollup-plugin-generate-package-json';
+import reactDomConfig from './react-dom.config';
+import reactConfig from './react.config';
 
-const tsConfig = { tsConfig: 'tsconfig.json' };
-
-function resolvePkgPath(pkgName, isDist) {
-	const pkgPath = path.resolve(__dirname, '../../packages');
-	const distPath = path.resolve(__dirname, '../../dist/node_modules');
-	if (isDist) {
-		return `${distPath}/${pkgName}`;
-	}
-	return `${pkgPath}}/${pkgName}`;
-}
-
-export default [
-	{
-		input: `${resolvePkgPath('react-dom', false)}/index.ts`,
-		output: [
-			{
-				file: `${resolvePkgPath('react-dom', true)}/client.js`,
-				name: 'client.js',
-				format: 'umd'
-			},
-			{
-				file: `${resolvePkgPath('react-dom', true)}/index.js`,
-				name: 'index.js',
-				format: 'umd'
-			}
-		],
-		plugins: [
-			typescript(tsConfig),
-			resolve(),
-			generatePackageJson({
-				inputFolder: resolvePkgPath('react-dom', false),
-				outputFolder: resolvePkgPath('react-dom', true),
-				baseContents: ({ name, description, version }) => ({
-					name,
-					description,
-					version,
-					main: 'index.js'
-				})
-			})
-		]
-	}
-];
+export default () => {
+	return [...reactConfig, ...reactDomConfig];
+};

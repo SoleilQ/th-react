@@ -53,16 +53,18 @@ const commitPlacement = (finishedWork: FiberNode) => {
 	// parentDom 插入 finishWork对应的dom
 	const hostParent = getHostParent(finishedWork);
 	// finsihedWork.stateNode 对应的dom节点 appendChild parent Dom
-	appendPlacementNodeIntoContainer(finishedWork, hostParent);
+	if (hostParent !== null) {
+		appendPlacementNodeIntoContainer(finishedWork, hostParent);
+	}
 };
 
-const getHostParent = (fiber: FiberNode) => {
+const getHostParent = (fiber: FiberNode): Container | null => {
 	let parent = fiber.return;
 	if (parent !== null) {
 		const parentTag = parent.tag;
 		// hostComponent
 		if (parentTag === HostComponent) {
-			return parent.stateNode;
+			return parent.stateNode as Container;
 		}
 		// hostRoot
 		if (parentTag === HostRoot) {

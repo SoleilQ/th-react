@@ -1,4 +1,0 @@
-3个阶段
-schedule阶段
-render阶段(beginWork completeWork)
-commit阶段(commitRoot)
