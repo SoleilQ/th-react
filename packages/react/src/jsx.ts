@@ -72,9 +72,10 @@ export const jsx = (
 	return ReactElement(type, key, ref, props);
 };
 
-export const jsxDev = (type: ElementType, config: any) => {
-	let key: Key = null;
+export const jsxDEV = (type: ElementType, config: any) => {
 	const props: Props = {};
+
+	let key: Key = null;
 	let ref: Ref = null;
 	// 筛选出 key 和 ref，其他的都作为 props
 	for (const prop in config) {

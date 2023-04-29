@@ -12,7 +12,7 @@ let workInProgress: FiberNode | null = null;
  * 初始化 让workInProgress指向第一个fiberNode
  * @param fiber
  */
-function prepareRefreshStack(root: FiberRootNode) {
+function prepareFreshStack(root: FiberRootNode) {
 	workInProgress = createWorkInProgress(root.current, {});
 }
 
@@ -22,6 +22,7 @@ function prepareRefreshStack(root: FiberRootNode) {
  */
 export function scheduleUpdateOnFiber(fiber: FiberNode) {
 	// 调度功能
+	// 触发更新未必从根节点，所以向上一直找到 fiberRootNode
 	const root = markUpdateFromFiberToRoot(fiber);
 	renderRoot(root);
 }
@@ -34,6 +35,7 @@ export function scheduleUpdateOnFiber(fiber: FiberNode) {
 function markUpdateFromFiberToRoot(fiber: FiberNode) {
 	let node = fiber;
 	let parent = node.return;
+	// 正常的 fiberNode 都有 return 但是 hostRootFiber 没有 return
 	while (parent !== null) {
 		node = parent;
 		parent = node.return;
@@ -46,7 +48,7 @@ function markUpdateFromFiberToRoot(fiber: FiberNode) {
 
 function renderRoot(root: FiberRootNode) {
 	// 初始化 将workInProgress 指向第一个fiberNode
-	prepareRefreshStack(root);
+	prepareFreshStack(root);
 
 	do {
 		try {
@@ -115,7 +117,7 @@ function performUnitOfWork(fiber: FiberNode) {
 	if (next === null) {
 		completeUnitOfWork(fiber);
 	} else {
-		// 有子节点 遍历子节点
+		// 有子节点 遍历子节点  继续执行 workLoop()
 		workInProgress = next;
 	}
 }

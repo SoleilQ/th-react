@@ -4,12 +4,22 @@ import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 
 export class FiberNode {
-	type: any; // 类型
-	tag: WorkTag;
+	tag: WorkTag; // 实例属性
+	/**
+	 * 从 ReactElement 中取得 type
+	 * 对于 FunctionComponent，() => {} 函数本身就是其 type。
+	 * 对于 div DOM，type 就是 'div'。
+	 */
+	type: any;
 	key: Key;
-	stateNode: any; // dom引用
+	/**
+	 * 比如对于 HostComponent <div>，div 这个 DOM 就是其 stateNode。
+	 * 对于 hostRootFiber，stateNode 就是 FiberRootNode。
+	 */
+	stateNode: any;
 	ref: Ref;
 
+	// 构成树状结构
 	return: FiberNode | null;
 	sibling: FiberNode | null;
 	child: FiberNode | null;
@@ -67,6 +77,13 @@ export class FiberRootNode {
 	}
 }
 
+/**
+ * 根据双缓存机制，应当返回 current 对应的 FiberNode。
+ * 对于同一个 fibernode，在多次更新时，会在双缓存中来回切换，避免重复创建。
+ * @param current
+ * @param pendingProps
+ * @returns
+ */
 export const createWorkInProgress = (
 	current: FiberNode,
 	pendingProps: Props
@@ -75,10 +92,9 @@ export const createWorkInProgress = (
 
 	if (workInProgress === null) {
 		// mount
+		// 需要新建一个 FiberNode
 		workInProgress = new FiberNode(current.tag, pendingProps, current.key);
-		workInProgress.type = current.type;
 		workInProgress.stateNode = current.stateNode;
-
 		workInProgress.alternate = current;
 		current.alternate = workInProgress;
 	} else {
@@ -105,9 +121,9 @@ export function createFiberFromElement(element: ReactElementType): FiberNode {
 		// <div> type: div
 		fiberTag = HostComponent;
 	} else if (typeof type !== 'function' && __DEV__) {
-		console.warn('未定义的type类型', element);
+		console.warn('createFiberFromElement 未定义的type类型', element);
 	}
-	const fiber = new FiberNode(type, props, key);
-	fiber.type = fiberTag;
+	const fiber = new FiberNode(fiberTag, props, key);
+	fiber.type = type;
 	return fiber;
 }

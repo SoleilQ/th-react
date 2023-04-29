@@ -1,10 +1,22 @@
 import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { UpdateQueue, processUpdateQueue } from './updateQueue';
-import { HostComponent, HostRoot, HostText } from './workTags';
+import {
+	FunctionComponent,
+	HostComponent,
+	HostRoot,
+	HostText
+} from './workTags';
 import { mountChildFibers, reconcileChildFibers } from './childFibers';
+import { renderWithHooks } from './fiberHooks';
 
 // 递归中的递阶段
+
+// <A><B/></A>
+// 当进入A的beginWork时，通过对比B的current fiberNode 和 B reactElement
+// 生成B对应的workInProgress fiberNode
+
+// 构造离屏DOM树，只需要执行一次Placement
 
 /**
  * 1.根据当前fiberNode创建子fiberNode
@@ -23,17 +35,32 @@ export const beginWork = (workInPorgress: FiberNode) => {
 		case HostComponent:
 			return updateHostComponent(workInPorgress);
 		case HostText:
+			// 没有子节点
 			return null;
+		case FunctionComponent:
+			return updateFunctionComponent(workInPorgress);
 		default:
 			if (__DEV__) {
-				console.warn('beginWork未实现的类型');
+				console.warn('beginWork未实现的类型', workInPorgress);
 			}
 			break;
 	}
 	return null;
 };
 
+function updateFunctionComponent(workInProgress: FiberNode) {
+	// 调用Component函数 得到children
+	const nextChildren = renderWithHooks(workInProgress);
+	reconcileChildren(workInProgress, nextChildren);
+	return workInProgress.child;
+}
+
 function updateHostRoot(workInProgress: FiberNode) {
+	// 对于 HostRoot
+	// 1. 计算状态最新值
+	// 2. 创建子 fiberNode
+
+	// 首屏渲染时不存在
 	const baseState = workInProgress.memoizedState;
 	const updateQueue = workInProgress.updateQueue as UpdateQueue<Element>;
 	// 获取之前的更新队列
@@ -48,6 +75,8 @@ function updateHostRoot(workInProgress: FiberNode) {
 }
 
 function updateHostComponent(workInProgress: FiberNode) {
+	// 对于HostComponent，只有创建子fiberNode
+	// <div>{children}</div> -> div.props.children
 	const nextProps = workInProgress.pendingProps;
 	const nextChildren = nextProps.children;
 	reconcileChildren(workInProgress, nextChildren);
@@ -65,7 +94,7 @@ function reconcileChildren(
 ) {
 	const current = workInProgress.alternate;
 	if (current !== null) {
-		// update
+		// update hostRootFiber Placement
 		workInProgress.child = reconcileChildFibers(
 			workInProgress,
 			current.child,

@@ -29,6 +29,7 @@ export const commitMutationEffects = (finishedWork: FiberNode) => {
 					nextEffect = sibling;
 					break;
 				}
+				nextEffect = nextEffect.return;
 			}
 		}
 	}
@@ -36,7 +37,7 @@ export const commitMutationEffects = (finishedWork: FiberNode) => {
 
 const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 	const flags = finishedWork.flags;
-	if ((flags & Placement) !== flags) {
+	if ((flags & Placement) !== NoFlags) {
 		commitPlacement(finishedWork);
 		finishedWork.flags &= ~Placement; // 移除Placement
 	}
@@ -62,29 +63,36 @@ const getHostParent = (fiber: FiberNode): Container | null => {
 	let parent = fiber.return;
 	if (parent !== null) {
 		const parentTag = parent.tag;
-		// hostComponent
-		if (parentTag === HostComponent) {
-			return parent.stateNode as Container;
-		}
 		// hostRoot
 		if (parentTag === HostRoot) {
 			return (parent.stateNode as FiberRootNode).container;
 		}
+		// hostComponent
+		if (parentTag === HostComponent) {
+			return parent.stateNode as Container;
+		}
 		parent = parent.return;
 	}
 	if (__DEV__) {
-		console.warn('未找到host parent');
+		console.warn('未找到host parent', fiber);
 	}
 	return null;
 };
 
+/**
+ * 将标记Placement的fiber节点对应的宿主环境节点插入到父宿主节点中
+ * 传入的 fiber 不一定有对应宿主环境节点，需要向下递归找到实际的 host node。
+ * @param finishedWork
+ * @param hostParent
+ * @returns
+ */
 const appendPlacementNodeIntoContainer = (
 	finishedWork: FiberNode,
 	hostParent: Container
 ) => {
 	// fiber host
 	if (finishedWork.tag === HostComponent || finishedWork.tag === HostText) {
-		appendChildToContainer(finishedWork.stateNode, hostParent);
+		appendChildToContainer(hostParent, finishedWork.stateNode);
 		return;
 	}
 	const child = finishedWork.child;
