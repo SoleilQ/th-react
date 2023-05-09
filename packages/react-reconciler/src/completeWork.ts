@@ -11,7 +11,11 @@ import {
 	HostRoot,
 	HostText
 } from './workTags';
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
+
+function markUpdate(fiber: FiberNode) {
+	fiber.flags |= Update;
+}
 
 export const completeWork = (workInProgress: FiberNode) => {
 	// 递归中的归
@@ -24,10 +28,10 @@ export const completeWork = (workInProgress: FiberNode) => {
 		case HostComponent:
 			if (current !== null && workInProgress.stateNode) {
 				// update
+				// 属性变化
 			} else {
 				// mount
 				// 1. 构建DOM
-
 				const instance = createInstance(workInProgress.type, newProps);
 				// 2. 将DOM插入到DOM树中
 				appendAllChildren(instance, workInProgress);
@@ -39,6 +43,11 @@ export const completeWork = (workInProgress: FiberNode) => {
 		case HostText:
 			if (current !== null && workInProgress.stateNode) {
 				// update
+				const oldText = current.memoizedProps.content;
+				const newText = newProps.content;
+				if (oldText !== newText) {
+					markUpdate(workInProgress);
+				}
 			} else {
 				// mount
 				// 1. 构建DOM

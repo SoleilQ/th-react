@@ -34,6 +34,7 @@ export class FiberNode {
 	flags: Flags; // 副作用标识
 	subtreeFlags: Flags; // 子树的副作用标识
 	updateQueue: unknown;
+	deletions: FiberNode[] | null;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		// 实例的属性
@@ -62,6 +63,7 @@ export class FiberNode {
 		// 副作用
 		this.flags = NoFlags;
 		this.subtreeFlags = NoFlags;
+		this.deletions = null;
 	}
 }
 
@@ -103,6 +105,7 @@ export const createWorkInProgress = (
 		// 清除副作用 （上一次更新遗留下来的）
 		workInProgress.flags = NoFlags;
 		workInProgress.subtreeFlags = NoFlags;
+		workInProgress.deletions = null;
 	}
 	workInProgress.type = current.type;
 	workInProgress.updateQueue = current.updateQueue;
