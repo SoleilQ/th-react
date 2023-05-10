@@ -12,6 +12,7 @@ import {
 	HostText
 } from './workTags';
 import { NoFlags, Update } from './fiberFlags';
+import { updateFiberProps } from 'react-dom/src/SyntheticEvent';
 
 function markUpdate(fiber: FiberNode) {
 	fiber.flags |= Update;
@@ -28,7 +29,14 @@ export const completeWork = (workInProgress: FiberNode) => {
 		case HostComponent:
 			if (current !== null && workInProgress.stateNode) {
 				// update
-				// 属性变化
+				// TODO:
+				// 应该比较各种 props 是否变化，记录更新 flags，然后在 commit 阶段再更新
+				// fiberNode.updateQueue = [
+				// 'className', 'xxx', 'style', 'xxx'
+				// ]
+				// 变的属性名，变的属性值，变的属性名，变的属性值
+
+				updateFiberProps(workInProgress.stateNode, newProps);
 			} else {
 				// mount
 				// 1. 构建DOM

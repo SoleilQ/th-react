@@ -29,12 +29,12 @@ export class FiberNode {
 	pendingProps: Props;
 	// 工作结束后确定下的 props
 	memoizedProps: Props | null;
-	memoizedState: Props | null;
-	alternate: FiberNode | null; // 双缓存树指向(workInProgress 和 current切换）
+	memoizedState: any;
+	alternate: FiberNode | null; // 双缓存树指向(workInProgress 和 current切换
 	flags: Flags; // 副作用标识
 	subtreeFlags: Flags; // 子树的副作用标识
 	updateQueue: unknown;
-	deletions: FiberNode[] | null;
+	deletions: FiberNode[] | null; // 存储此节点下所有需要删除的子节点
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		// 实例的属性

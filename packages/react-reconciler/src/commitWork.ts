@@ -102,7 +102,7 @@ function commitDeletion(childToDelete: FiberNode) {
 	if (rootHostNode !== null) {
 		const hostParent = getHostParent(rootHostNode);
 		if (hostParent !== null) {
-			removeChild(rootHostNode, hostParent);
+			removeChild((rootHostNode as FiberNode).stateNode, hostParent);
 		}
 	}
 	childToDelete.return = null;
@@ -156,7 +156,7 @@ const commitPlacement = (finishedWork: FiberNode) => {
 
 const getHostParent = (fiber: FiberNode): Container | null => {
 	let parent = fiber.return;
-	if (parent !== null) {
+	while (parent !== null) {
 		const parentTag = parent.tag;
 		// hostRoot
 		if (parentTag === HostRoot) {
