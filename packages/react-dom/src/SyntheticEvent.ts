@@ -100,6 +100,13 @@ function getEventCallbackNameFromEventType(
 	}[eventType];
 }
 
+/**
+ *
+ * @param targetElement 点击的目标元素e.target
+ * @param container 容器Dom元素
+ * @param eventType 事件类型，主要是用于映射，例如click 映射 onClick、onClickCapture
+ * @returns
+ */
 function collectPaths(
 	targetElement: DOMElement,
 	container: Container,
