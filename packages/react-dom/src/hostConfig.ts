@@ -58,3 +58,11 @@ export function inserChildInToContainer(
 ) {
 	container.insertBefore(child, before);
 }
+
+// 判断宿主环境是否支持微任务
+export const scheduleMicroTask =
+	typeof queueMicrotask === 'function'
+		? queueMicrotask
+		: typeof Promise === 'function'
+		? (callback: (...args: any) => void) => Promise.resolve(null).then(callback)
+		: setTimeout;

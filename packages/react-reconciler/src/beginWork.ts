@@ -10,6 +10,7 @@ import {
 } from './workTags';
 import { mountChildFibers, reconcileChildFibers } from './childFibers';
 import { renderWithHooks } from './fiberHooks';
+import { Lane } from './fiberLanes';
 
 // 递归中的递阶段
 
@@ -25,13 +26,13 @@ import { renderWithHooks } from './fiberHooks';
  * @param workInPorgress
  * @returns
  */
-export const beginWork = (workInPorgress: FiberNode) => {
+export const beginWork = (workInPorgress: FiberNode, renderLane: Lane) => {
 	// 比较, 返回子fiberNode
 	switch (workInPorgress.tag) {
 		// 1.计算状态的最新值
 		// 2.创造子fiberNode
 		case HostRoot:
-			return updateHostRoot(workInPorgress);
+			return updateHostRoot(workInPorgress, renderLane);
 		// 1.创造子fiberNode
 		case HostComponent:
 			return updateHostComponent(workInPorgress);
@@ -39,7 +40,7 @@ export const beginWork = (workInPorgress: FiberNode) => {
 			// 没有子节点
 			return null;
 		case FunctionComponent:
-			return updateFunctionComponent(workInPorgress);
+			return updateFunctionComponent(workInPorgress, renderLane);
 		case Fragment:
 			return updateFragment(workInPorgress);
 		default:
@@ -51,9 +52,9 @@ export const beginWork = (workInPorgress: FiberNode) => {
 	return null;
 };
 
-function updateFunctionComponent(workInProgress: FiberNode) {
+function updateFunctionComponent(workInProgress: FiberNode, renderLane: Lane) {
 	// 调用Component函数 得到children
-	const nextChildren = renderWithHooks(workInProgress);
+	const nextChildren = renderWithHooks(workInProgress, renderLane);
 	reconcileChildren(workInProgress, nextChildren);
 	return workInProgress.child;
 }
@@ -64,7 +65,7 @@ function updateFragment(workInProgress: FiberNode) {
 	return workInProgress.child;
 }
 
-function updateHostRoot(workInProgress: FiberNode) {
+function updateHostRoot(workInProgress: FiberNode, renderLane: Lane) {
 	// 对于 HostRoot
 	// 1. 计算状态最新值
 	// 2. 创建子 fiberNode
@@ -75,7 +76,7 @@ function updateHostRoot(workInProgress: FiberNode) {
 	// 获取之前的更新队列
 	const pending = updateQueue.shared.pending;
 	updateQueue.shared.pending = null;
-	const { memoizedState } = processUpdateQueue(baseState, pending); // 最新状态
+	const { memoizedState } = processUpdateQueue(baseState, pending, renderLane); // 最新状态
 	workInProgress.memoizedState = memoizedState; // 其实就是传入的element <App />
 
 	const nextChildren = workInProgress.memoizedState; // ReactElement对象
