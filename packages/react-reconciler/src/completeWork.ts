@@ -1,5 +1,6 @@
 import {
 	Container,
+	Instance,
 	appendInitialChild,
 	createInstance,
 	createTextInstance
@@ -13,7 +14,6 @@ import {
 	HostText
 } from './workTags';
 import { NoFlags, Update } from './fiberFlags';
-import { updateFiberProps } from 'react-dom/src/SyntheticEvent';
 
 function markUpdate(fiber: FiberNode) {
 	fiber.flags |= Update;
@@ -36,8 +36,7 @@ export const completeWork = (workInProgress: FiberNode) => {
 				// 'className', 'xxx', 'style', 'xxx'
 				// ]
 				// 变的属性名，变的属性值，变的属性名，变的属性值
-
-				updateFiberProps(workInProgress.stateNode, newProps);
+				markUpdate(workInProgress);
 			} else {
 				// mount
 				// 1. 构建DOM
@@ -86,7 +85,10 @@ export const completeWork = (workInProgress: FiberNode) => {
  * @param workInProgress
  * @returns
  */
-function appendAllChildren(parent: Container, workInProgress: FiberNode) {
+function appendAllChildren(
+	parent: Container | Instance,
+	workInProgress: FiberNode
+) {
 	let node = workInProgress.child;
 	while (node !== null) {
 		if (node.tag === HostComponent || node.tag === HostText) {
